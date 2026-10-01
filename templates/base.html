@@ -1,0 +1,109 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}JET SKILLS{% endblock %}
+    </title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+</head>
+
+
+<body>
+
+    <!-- =====================================
+     SIDEBAR
+===================================== -->
+
+    <aside class="sidebar">
+
+        <!-- BRAND -->
+
+        <div class="brand">
+
+            <img src="{% static 'images/logo.png' %}" alt="JET SKILLS Logo" class="brand-logo">
+
+            <div class="brand-text">
+
+                <h2>JET SKILLS</h2>
+
+                <p>CSR – Tuticorin</p>
+
+            </div>
+
+        </div>
+
+
+        <!-- NAVIGATION -->
+
+        <nav>
+
+            <a href="{% url 'dashboard' %}"
+                class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                Dashboard
+            </a>
+
+
+            <a href="{% url 'student_list' %}"
+                class="{% if request.resolver_match.url_name == 'student_list' %}active{% endif %}">
+                Student Management
+            </a>
+
+
+            <a href="#">
+                Faculty Management
+            </a>
+
+
+            <a href="#">
+                Training
+            </a>
+
+
+            <a href="#">
+                Monitoring
+            </a>
+
+
+            <a href="#">
+                Reports
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- =====================================
+     MAIN CONTENT
+===================================== -->
+
+    <main class="main">
+
+        {% block content %}
+
+        {% endblock %}
+
+    </main>
+
+
+    {% block scripts %}
+
+    {% endblock %}
+
+</body>
+
+</html>

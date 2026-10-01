@@ -1,0 +1,219 @@
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#1f2937}.sidebar{position:fixed;left:0;top:0;bottom:0;width:250px;background:#172554;color:white;padding:24px 16px}.brand{padding:0 10px 22px;border-bottom:1px solid rgba(255,255,255,.15);display:flex;align-items:center;gap:12px}.brand-logo{width:46px;height:46px;object-fit:contain;flex-shrink:0}.brand-text{min-width:0}.brand h2{font-size:20px;margin:0 0 7px}.brand p{margin:0;color:#bfdbfe;font-size:13px}.sidebar nav{padding-top:20px}.sidebar nav a{display:block;color:#dbeafe;text-decoration:none;padding:12px 14px;border-radius:8px;margin:5px 0;font-size:14px}.sidebar nav a:hover,.sidebar nav a.active{background:#2563eb;color:#fff}.main{margin-left:250px;padding:28px}header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}header h1{margin:0 0 6px;font-size:27px}header p{margin:0;color:#6b7280}.primary,.secondary,.danger{border:0;border-radius:7px;padding:10px 14px;cursor:pointer;font-weight:600}.primary{background:#2563eb;color:white}.secondary{background:#e5e7eb;color:#111827}.danger{background:#fee2e2;color:#b91c1c}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}.card,.panel{background:white;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 2px 8px rgba(15,23,42,.04)}.card{padding:20px}.card p{margin:0;color:#6b7280}.card h2{margin:10px 0 0;font-size:28px}.panel{padding:20px}.panel-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.panel-title h2{margin:0;font-size:18px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.toolbar input,.toolbar select,.form-grid input,.form-grid select,.form-grid textarea{border:1px solid #d1d5db;border-radius:7px;padding:10px 11px;font:inherit;background:#fff}.toolbar input{min-width:280px;flex:1}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:900px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid #e5e7eb;font-size:13px}th{background:#f8fafc;color:#475569}.badge{display:inline-block;padding:5px 8px;border-radius:999px;font-size:12px;background:#dbeafe;color:#1d4ed8}.empty{text-align:center;color:#94a3b8;padding:35px}.pagination{display:flex;justify-content:space-between;align-items:center;margin-top:15px;color:#64748b;font-size:13px}.pagination button{padding:7px 10px;border:1px solid #d1d5db;background:white;border-radius:6px;cursor:pointer}.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:20;padding:30px;overflow:auto}.modal.show{display:block}.modal-box{max-width:850px;margin:20px auto;background:white;border-radius:12px;padding:22px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modal-head h2{margin:0}.close{border:0;background:transparent;font-size:25px;cursor:pointer}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:13px;font-weight:600}.field.full{grid-column:1/-1}.field textarea{min-height:80px;resize:vertical}.required{color:#dc2626}.form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}.action-btn{border:0;background:none;color:#2563eb;cursor:pointer;padding:3px}.action-btn.delete{color:#dc2626}.placeholder{padding:55px;text-align:center;color:#64748b}@media(max-width:900px){.sidebar{width:210px}.main{margin-left:210px}.cards{grid-template-columns:1fr 1fr}}@media(max-width:650px){.sidebar{position:static;width:100%}.main{margin-left:0;padding:18px}.cards,.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}header{align-items:flex-start;gap:15px;flex-direction:column}}
+
+
+/* =====================================================
+   STUDENT MANAGEMENT
+===================================================== */
+
+.student-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 18px;
+}
+
+.student-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.student-toolbar-left input {
+    width: 100%;
+    max-width: 400px;
+    min-width: 250px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    padding: 10px 12px;
+    font: inherit;
+    background: #fff;
+}
+
+.student-toolbar-left select {
+    min-width: 190px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    padding: 10px 12px;
+    font: inherit;
+    background: #fff;
+}
+
+.student-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+
+/* Mobile / Tablet */
+
+@media (max-width: 850px) {
+
+    .student-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .student-toolbar-left,
+    .student-toolbar-right {
+        width: 100%;
+    }
+
+    .student-toolbar-left {
+        flex-wrap: wrap;
+    }
+
+    .student-toolbar-left input {
+        max-width: none;
+    }
+
+    .student-toolbar-right {
+        justify-content: flex-end;
+    }
+}
+
+
+@media (max-width: 550px) {
+
+    .student-toolbar-left,
+    .student-toolbar-right {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .student-toolbar-left input,
+    .student-toolbar-left select {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+/* ==========================================
+   STUDENT MANAGEMENT TOOLBAR
+========================================== */
+
+.student-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 18px;
+}
+
+.student-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.student-toolbar-left input {
+    width: 100%;
+    max-width: 400px;
+    min-width: 260px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    padding: 10px 12px;
+    font: inherit;
+}
+
+.student-toolbar-left select {
+    min-width: 190px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    padding: 10px 12px;
+    font: inherit;
+    background: white;
+}
+
+.student-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pagination-link {
+    display: inline-block;
+    padding: 7px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #1f2937;
+    background: white;
+}
+
+.page-number {
+    margin: 0 10px;
+}
+
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media (max-width: 900px) {
+
+    .student-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .student-toolbar-left {
+        flex-wrap: wrap;
+    }
+
+    .student-toolbar-right {
+        justify-content: flex-end;
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .student-toolbar-left,
+    .student-toolbar-right {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .student-toolbar-left input,
+    .student-toolbar-left select {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+    }
+
+}
+
+
+.table-options {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.table-options select {
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 7px 9px;
+    background: white;
+}
+
+.pagination-link.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.excel-download-btn {
+    display: inline-block;
+    text-decoration: none;
+}

@@ -1,0 +1,869 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Student Management | JET SKILLS
+{% endblock %}
+
+{% block content %}
+
+<header>
+    <div>
+        <h1>Student Management</h1>
+    </div>
+</header>
+
+
+<!-- =====================================================
+     SUMMARY CARDS
+===================================================== -->
+
+<section class="cards">
+
+    <div class="card">
+        <p>Total Candidates</p>
+        <h2>{{ total_candidates }}</h2>
+    </div>
+
+    <div class="card">
+        <p>Interested</p>
+        <h2>{{ interested_count }}</h2>
+    </div>
+
+    <div class="card">
+        <p>Wait for Confirmation</p>
+        <h2>{{ waiting_count }}</h2>
+    </div>
+
+    <div class="card">
+        <p>Not-Interested</p>
+        <h2>{{ not_interested_count }}</h2>
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CANDIDATE RECORDS
+===================================================== -->
+
+<section class="panel">
+
+    <div class="panel-title">
+        <h2>Candidate Records</h2>
+    </div>
+
+
+    <!-- =================================================
+         SEARCH / FILTER / BUTTONS
+    ================================================== -->
+
+    <div class="student-toolbar">
+
+        <form method="GET" class="student-toolbar-left">
+
+            <input type="text" name="search" value="{{ search }}"
+                placeholder="Search candidate name, contact no., email...">
+
+
+            <select name="status" id="statusFilter" onchange="this.form.submit()">
+
+                <option value="">All Status</option>
+                <option value="Interested">Interested</option>
+                <option value="Wait for Confirmation">Wait for Confirmation</option>
+                <option value="Not-Interested">Not-Interested</option>
+
+            </select>
+
+            <script>
+                document.getElementById('statusFilter').value = "{{ status_filter|escapejs }}";
+            </script>
+
+
+            <button type="submit" class="secondary">
+                Search
+            </button>
+
+        </form>
+
+
+        <div class="student-toolbar-right">
+
+            <a href="{% url 'export_candidates' %}?search={{ search|urlencode }}&status={{ status_filter|urlencode }}"
+                class="secondary excel-download-btn">
+                Excel Download
+            </a>
+
+
+            <button type="button" class="primary" onclick="openCandidateModal()">
+                + Add Candidate
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         CANDIDATE TABLE
+    ================================================== -->
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>S.No</th>
+                    <th>Enquiry Date</th>
+                    <th>Candidate Name</th>
+                    <th>Contact No.</th>
+                    <th>Gender</th>
+                    <th>Qualification</th>
+                    <th>Status</th>
+                    <th>Remark</th>
+                    <th>Action</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for candidate in page_obj %}
+
+                <tr>
+
+                    <!-- S.NO -->
+
+                    <td>
+                        {{ forloop.counter0|add:page_obj.start_index }}
+                    </td>
+
+
+                    <!-- ENQUIRY DATE -->
+
+                    <td>
+                        {{ candidate.enquiry_date|date:"d-m-Y" }}
+                    </td>
+
+
+                    <!-- CANDIDATE NAME -->
+
+                    <td>
+                        {{ candidate.candidate_name }}
+                    </td>
+
+
+                    <!-- CONTACT NUMBER -->
+
+                    <td>
+                        {{ candidate.contact_no }}
+                    </td>
+
+
+                    <!-- GENDER -->
+
+                    <td>
+                        {{ candidate.gender|default:"-" }}
+                    </td>
+
+
+                    <!-- QUALIFICATION -->
+
+                    <td>
+                        {{ candidate.qualification|default:"-" }}
+                    </td>
+
+
+                    <!-- STATUS -->
+
+                    <td>
+                        {{ candidate.status|default:"-" }}
+                    </td>
+
+
+                    <!-- REMARK -->
+
+                    <td>
+                        {{ candidate.remark|default:"-" }}
+                    </td>
+
+
+                    <!-- ACTION -->
+
+                    <td>
+
+                        <!-- EDIT -->
+
+                        <button type="button" class="action-btn edit-candidate-btn" data-id="{{ candidate.id }}"
+                            data-enquiry-date="{{ candidate.enquiry_date|date:'Y-m-d' }}"
+                            data-candidate-name="{{ candidate.candidate_name }}"
+                            data-contact-no="{{ candidate.contact_no }}" data-email="{{ candidate.email }}"
+                            data-gender="{{ candidate.gender }}" data-dob="{{ candidate.dob|date:'Y-m-d' }}"
+                            data-qualification="{{ candidate.qualification }}"
+                            data-guardian-name="{{ candidate.guardian_name }}"
+                            data-guardian-contact="{{ candidate.guardian_contact_no }}"
+                            data-address="{{ candidate.address }}" data-status="{{ candidate.status }}"
+                            data-remark="{{ candidate.remark }}" onclick="openEditCandidate(this)">
+                            Edit
+                        </button>
+
+                        <!-- ASSIGN -->
+
+                        <button type="button" class="action-btn"
+                            onclick="alert('Batch assignment will be enabled after the Training / Batch module is created.')">
+                            Assign
+                        </button>
+
+
+                        <!-- DELETE -->
+
+                        <form method="POST" action="{% url 'delete_candidate' candidate.id %}" style="display:inline;"
+                            onsubmit="return confirm('Are you sure you want to delete this candidate?');">
+
+                            {% csrf_token %}
+
+                            <button type="submit" class="action-btn delete">
+                                Delete
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                </tr>
+
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="9" class="empty">
+                        No candidate records found.
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- =================================================
+     PAGINATION
+================================================== -->
+
+    <div class="pagination">
+
+
+        <div class="table-options">
+
+            <span>Show</span>
+
+            <select id="pageSize" onchange="changePageSize(this.value)">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+
+            <span>entries</span>
+
+        </div>
+
+        <span>
+            Showing
+            {{ page_obj.start_index }}
+            -
+            {{ page_obj.end_index }}
+            of
+            {{ page_obj.paginator.count }}
+            records
+        </span>
+
+        <div>
+
+            <!-- PREVIOUS -->
+
+            {% if page_obj.has_previous %}
+
+            <a class="pagination-link"
+                href="?page={{ page_obj.previous_page_number }}&page_size={{ page_size }}&search={{ search|urlencode }}&status={{ status_filter|urlencode }}">
+                Previous
+            </a>
+
+            {% else %}
+
+            <span class="pagination-link disabled">
+                Previous
+            </span>
+
+            {% endif %}
+
+
+            <!-- PAGE NUMBER -->
+
+            <span class="page-number">
+                Page {{ page_obj.number }}
+                of {{ page_obj.paginator.num_pages }}
+            </span>
+
+
+            <!-- NEXT -->
+
+            {% if page_obj.has_next %}
+
+            <a class="pagination-link"
+                href="?page={{ page_obj.next_page_number }}&page_size={{ page_size }}&search={{ search|urlencode }}&status={{ status_filter|urlencode }}">
+                Next
+            </a>
+
+            {% else %}
+
+            <span class="pagination-link disabled">
+                Next
+            </span>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ADD / EDIT CANDIDATE MODAL
+===================================================== -->
+
+<div class="modal" id="candidateModal">
+
+    <div class="modal-box">
+
+
+        <!-- MODAL HEADER -->
+
+        <div class="modal-head">
+
+            <h2 id="modalTitle">
+                Add Candidate
+            </h2>
+
+
+            <button type="button" class="close" onclick="closeCandidateModal()">
+                &times;
+            </button>
+
+        </div>
+
+
+        <!-- FORM -->
+
+        <form method="POST" id="candidateForm" action="{% url 'add_candidate' %}">
+
+            {% csrf_token %}
+
+
+            <div class="form-grid">
+
+
+                <!-- ENQUIRY DATE -->
+
+                <div class="field">
+
+                    <label>
+
+                        Enquiry Date
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <input type="date" name="enquiry_date" id="enquiryDate" required>
+
+                </div>
+
+
+                <!-- CANDIDATE NAME -->
+
+                <div class="field">
+
+                    <label>
+
+                        Candidate Name
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <input type="text" name="candidate_name" id="candidateName" required>
+
+                </div>
+
+
+                <!-- CONTACT NUMBER -->
+
+                <div class="field">
+
+                    <label>
+
+                        Contact No.
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <input type="text" name="contact_no" id="contactNo" maxlength="15" required>
+
+                </div>
+
+
+                <!-- EMAIL -->
+
+                <div class="field">
+
+                    <label>
+                        Email
+                    </label>
+
+
+                    <input type="email" name="email" id="email">
+
+                </div>
+
+
+                <!-- GENDER -->
+
+                <div class="field">
+
+                    <label>
+                        Gender <span class="required">*</span>
+                    </label>
+
+
+                    <select name="gender" id="gender" required>
+
+                        <option value="">
+                            Select Gender
+                        </option>
+
+                        <option value="Male">
+                            Male
+                        </option>
+
+                        <option value="Female">
+                            Female
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- DOB -->
+
+                <div class="field">
+
+                    <label>
+                        DOB
+                    </label>
+
+
+                    <input type="date" name="dob" id="dob">
+
+                </div>
+
+
+                <!-- QUALIFICATION -->
+
+                <div class="field">
+
+                    <label>
+                        Qualification
+                    </label>
+
+
+                    <input type="text" name="qualification" id="qualification">
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="field">
+
+                    <label>
+                        Status <span class="required">*</span>
+                    </label>
+
+
+                    <select name="status" id="status" required>
+
+                        <option value="">
+                            Select Status
+                        </option>
+
+                        <option value="Interested">
+                            Interested
+                        </option>
+
+                        <option value="Wait for Confirmation">
+                            Wait for Confirmation
+                        </option>
+
+                        <option value="Not-Interested">
+                            Not-Interested
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- FATHER / GUARDIAN NAME -->
+
+                <div class="field">
+
+                    <label>
+                        Father / Guardian Name
+                    </label>
+
+
+                    <input type="text" name="guardian_name" id="guardianName">
+
+                </div>
+
+
+                <!-- FATHER / GUARDIAN CONTACT -->
+
+                <div class="field">
+
+                    <label>
+                        Father / Guardian Contact No.
+                    </label>
+
+
+                    <input type="text" name="guardian_contact_no" id="guardianContact" maxlength="15">
+
+                </div>
+
+
+                <!-- ADDRESS -->
+
+                <div class="field full">
+
+                    <label>
+                        Address
+                    </label>
+
+
+                    <textarea name="address" id="address" rows="3"></textarea>
+
+                </div>
+
+
+                <!-- REMARK -->
+
+                <div class="field full">
+
+                    <label>
+                        Remark
+                    </label>
+
+
+                    <textarea name="remark" id="remark" rows="3"></textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- FORM BUTTONS -->
+
+            <div class="form-actions">
+
+                <button type="button" class="secondary" onclick="closeCandidateModal()">
+                    Cancel
+                </button>
+
+
+                <button type="submit" class="primary">
+                    Save Candidate
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+{% block scripts %}
+
+<script>
+
+
+    /* =====================================================
+       ADD CANDIDATE
+    ===================================================== */
+
+    function openCandidateModal() {
+
+        const modal = document.getElementById('candidateModal');
+        const form = document.getElementById('candidateForm');
+
+        document.getElementById('modalTitle').textContent = 'Add Candidate';
+
+        form.reset();
+
+        form.action = "{% url 'add_candidate' %}";
+
+        // Automatically set system date
+        const today = new Date();
+
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+
+        document.getElementById('enquiryDate').value =
+            `${year}-${month}-${day}`;
+
+        modal.classList.add('show');
+    }
+
+
+    /* =====================================================
+       CLOSE MODAL
+    ===================================================== */
+
+    function closeCandidateModal() {
+
+        document.getElementById(
+            'candidateModal'
+        ).classList.remove(
+            'show'
+        );
+
+    }
+
+
+    /* =====================================================
+       EDIT CANDIDATE
+    ===================================================== */
+
+    function openEditCandidate(button) {
+
+        const modal =
+            document.getElementById(
+                'candidateModal'
+            );
+
+
+        const form =
+            document.getElementById(
+                'candidateForm'
+            );
+
+
+        document.getElementById(
+            'modalTitle'
+        ).textContent =
+            'Edit Candidate';
+
+
+        form.action =
+            "/students/edit/" +
+            button.dataset.id +
+            "/";
+
+
+        /* ENQUIRY DATE */
+
+        document.getElementById(
+            'enquiryDate'
+        ).value =
+            button.dataset.enquiryDate || '';
+
+
+        /* CANDIDATE NAME */
+
+        document.getElementById(
+            'candidateName'
+        ).value =
+            button.dataset.candidateName || '';
+
+
+        /* CONTACT */
+
+        document.getElementById(
+            'contactNo'
+        ).value =
+            button.dataset.contactNo || '';
+
+
+        /* EMAIL */
+
+        document.getElementById(
+            'email'
+        ).value =
+            button.dataset.email || '';
+
+
+        /* GENDER */
+
+        document.getElementById(
+            'gender'
+        ).value =
+            button.dataset.gender || '';
+
+
+        /* DOB */
+
+        document.getElementById(
+            'dob'
+        ).value =
+            button.dataset.dob || '';
+
+
+        /* QUALIFICATION */
+
+        document.getElementById(
+            'qualification'
+        ).value =
+            button.dataset.qualification || '';
+
+
+        /* GUARDIAN NAME */
+
+        document.getElementById(
+            'guardianName'
+        ).value =
+            button.dataset.guardianName || '';
+
+
+        /* GUARDIAN CONTACT */
+
+        document.getElementById(
+            'guardianContact'
+        ).value =
+            button.dataset.guardianContact || '';
+
+
+        /* ADDRESS */
+
+        document.getElementById(
+            'address'
+        ).value =
+            button.dataset.address || '';
+
+
+        /* STATUS */
+
+        document.getElementById(
+            'status'
+        ).value =
+            button.dataset.status || '';
+
+
+        /* REMARK */
+
+        document.getElementById(
+            'remark'
+        ).value =
+            button.dataset.remark || '';
+
+
+        modal.classList.add(
+            'show'
+        );
+
+    }
+
+
+    /* =====================================================
+       CLOSE MODAL WHEN CLICKING OUTSIDE
+    ===================================================== */
+
+    window.addEventListener(
+        'click',
+        function (event) {
+
+            const modal =
+                document.getElementById(
+                    'candidateModal'
+                );
+
+
+            if (
+                event.target === modal
+            ) {
+
+                closeCandidateModal();
+
+            }
+
+        }
+    );
+
+    /* =====================================================
+   PAGE SIZE - 10 / 20 / 50
+===================================================== */
+
+    function changePageSize(size) {
+
+        const params = new URLSearchParams(
+            window.location.search
+        );
+
+        params.set('page_size', size);
+        params.set('page', '1');
+
+        window.location.search = params.toString();
+    }
+
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        function () {
+
+            const pageSize =
+                document.getElementById('pageSize');
+
+            if (pageSize) {
+                pageSize.value =
+                    "{{ page_size|escapejs }}";
+            }
+
+        }
+    );
+
+
+</script>
+
+{% endblock %}
