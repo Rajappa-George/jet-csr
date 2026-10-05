@@ -8,6 +8,7 @@ from datetime import timedelta
 
 from students.models import Candidate
 from calling.models import CallingTask
+from accounts.models import UserProfile
 
 
 def get_user_role(user):
@@ -46,6 +47,19 @@ def login_view(request):
         )
 
         if user is not None:
+
+            # A superuser created with Django's createsuperuser command
+            # has no application profile by default. Create its profile
+            # before the first dashboard render so navigation can resolve
+            # the user's role.
+            if user.is_superuser:
+                UserProfile.objects.get_or_create(
+                    user=user,
+                    defaults={
+                        'role': 'Super Admin',
+                        'contact_no': '',
+                    }
+                )
 
             login(
                 request,
