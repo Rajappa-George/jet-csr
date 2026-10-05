@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ section_title }} | JET SKILLS{% endblock %}
+
+{% block content %}
+<header><div><h1>{{ section_title }}</h1></div></header>
+<section class="training-placeholder-panel">
+    <span class="training-placeholder-icon">↗</span>
+    <h2>{{ section_title }} is under development</h2>
+    <p>{{ section_description }}</p>
+    <a href="{% url 'dashboard' %}" class="secondary">Back to Dashboard</a>
+</section>
+{% endblock %}

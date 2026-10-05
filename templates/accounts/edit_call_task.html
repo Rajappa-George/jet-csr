@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Modify Call Task | JET SKILLS{% endblock %}
+{% block content %}
+<header><div><h1>Modify Call Task</h1><p>{{ task.candidate_name }} · {{ task.counsellor_name_snapshot|default:'Unassigned / archived' }}</p></div><a href="{% url 'assign_tasks' %}?tab=counsellor&counsellor={{ task.counsellor_id|default:'unassigned' }}" class="secondary">Back to Assign Task</a></header>
+<section class="panel edit-call-task-panel">
+    <form method="POST" class="edit-call-task-form">
+        {% csrf_token %}
+        <label>Candidate name<input name="candidate_name" value="{{ task.candidate_name }}" required maxlength="150"></label>
+        <label>Mobile number<input name="mobile" value="{{ task.mobile }}" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" required></label>
+        <label>Registration number<input name="reg_no" value="{{ task.reg_no }}" maxlength="100"></label>
+        <label>Reference<input name="reference" value="{{ task.reference }}" maxlength="150"></label>
+        <div class="form-actions"><button type="submit" class="primary">Save Changes</button></div>
+    </form>
+</section>
+{% endblock %}

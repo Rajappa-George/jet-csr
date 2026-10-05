@@ -17,18 +17,20 @@
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 
     <!-- Main CSS -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20261005-assignment-training-retention-final">
 
 </head>
 
 
 <body>
 
+
     <!-- =====================================
-     SIDEBAR
-===================================== -->
+         SIDEBAR
+    ====================================== -->
 
     <aside class="sidebar">
+
 
         <!-- BRAND -->
 
@@ -36,73 +38,226 @@
 
             <img src="{% static 'images/logo.png' %}" alt="JET SKILLS Logo" class="brand-logo">
 
+
             <div class="brand-text">
 
-                <h2>JET SKILLS</h2>
+                <h2>
+                    JET SKILLS
+                </h2>
 
-                <p>CSR – Tuticorin</p>
+                <p>
+                    CSR – Tuticorin
+                </p>
 
             </div>
 
         </div>
 
 
-        <!-- NAVIGATION -->
+
+        <!-- =================================
+             NAVIGATION
+        ================================== -->
 
         <nav>
 
+
+            <!-- DASHBOARD - ALL USERS -->
+
             <a href="{% url 'dashboard' %}"
                 class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+
                 Dashboard
+
             </a>
+
+
+
+            <!-- =================================
+                 COUNSELLOR MENU
+            ================================== -->
+
+            {% if request.user.profile.role == 'Counsellor' %}
+
+
+            <a href="{% url 'calling:task_list' %}"
+                class="{% if request.resolver_match.namespace == 'calling' %}active{% endif %}">
+
+                Calling Task
+
+            </a>
+
+            <a href="{% url 'student_list' %}"
+                class="{% if request.resolver_match.url_name == 'student_list' %}active{% endif %}">
+
+                Student Management
+
+            </a>
+
+
+
+            <!-- =================================
+                 SUPER ADMIN / ADMIN / OTHER
+            ================================== -->
+
+            {% else %}
 
 
             <a href="{% url 'student_list' %}"
                 class="{% if request.resolver_match.url_name == 'student_list' %}active{% endif %}">
+
                 Student Management
+
             </a>
 
 
-            <a href="#">
-                Faculty Management
+            {% if request.user.is_superuser or request.user.profile.role == 'Admin' %}
+            <a href="{% url 'assign_tasks' %}"
+                class="{% if request.resolver_match.url_name == 'assign_tasks' or request.resolver_match.url_name == 'edit_call_task' %}active{% endif %}">
+                Assign Task
+            </a>
+            {% endif %}
+
+
+            <details class="sidebar-nav-group" {% if 'training_' in request.resolver_match.url_name %}open{% endif %}>
+                <summary>Training</summary>
+                <div class="sidebar-subnav">
+                    <a href="{% url 'training_batches' %}" class="{% if request.resolver_match.url_name == 'training_batches' %}active{% endif %}">Batch Management</a>
+                    <a href="{% url 'training_sessions' %}" class="{% if request.resolver_match.url_name == 'training_sessions' %}active{% endif %}">Training</a>
+                    <a href="{% url 'training_attendance' %}" class="{% if request.resolver_match.url_name == 'training_attendance' %}active{% endif %}">Attendance</a>
+                </div>
+            </details>
+
+
+            <!-- USER MANAGEMENT -->
+
+            {% if request.user.is_superuser %}
+
+            <a href="{% url 'user_list' %}">
+
+                User Management
+
             </a>
 
+            {% elif request.user.profile.role == 'Admin' %}
 
-            <a href="#">
-                Training
+            <a href="{% url 'user_list' %}">
+
+                User Management
+
             </a>
 
-
-            <a href="#">
-                Monitoring
-            </a>
+            {% endif %}
 
 
-            <a href="#">
-                Reports
-            </a>
+            {% endif %}
+
 
         </nav>
+
+
+
+        <!-- =================================
+             LOGGED-IN USER
+        ================================== -->
+
+        <div class="sidebar-user">
+
+
+            <div class="sidebar-user-info">
+
+
+                <span class="sidebar-user-name">
+
+                    {% if request.user.get_full_name %}
+
+                    {{ request.user.get_full_name }}
+
+                    {% else %}
+
+                    {{ request.user.username }}
+
+                    {% endif %}
+
+                </span>
+
+
+
+                <span class="sidebar-user-role">
+
+                    {% if request.user.is_superuser %}
+
+                    Super Admin
+
+                    {% else %}
+
+                    {{ request.user.profile.role }}
+
+                    {% endif %}
+
+                </span>
+
+
+            </div>
+
+
+
+            <a href="{% url 'logout' %}" class="logout-btn">
+
+                Logout
+
+            </a>
+
+
+        </div>
+
 
     </aside>
 
 
+
     <!-- =====================================
-     MAIN CONTENT
-===================================== -->
+         MAIN CONTENT
+    ====================================== -->
 
     <main class="main">
+
+
+        <!-- DJANGO MESSAGES -->
+
+        {% if messages %}
+
+        <div class="message-container">
+
+            {% for message in messages %}
+
+            <div class="message {{ message.tags }}">
+
+                {{ message }}
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+
+
 
         {% block content %}
 
         {% endblock %}
 
+
     </main>
+
 
 
     {% block scripts %}
 
     {% endblock %}
+
 
 </body>
 

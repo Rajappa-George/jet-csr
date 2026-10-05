@@ -4,12 +4,16 @@
 Student Management | JET SKILLS
 {% endblock %}
 
+
 {% block content %}
 
+
 <header>
+
     <div>
         <h1>Student Management</h1>
     </div>
+
 </header>
 
 
@@ -20,26 +24,58 @@ Student Management | JET SKILLS
 <section class="cards">
 
     <div class="card">
-        <p>Total Candidates</p>
-        <h2>{{ total_candidates }}</h2>
+
+        <p>
+            Total Candidates
+        </p>
+
+        <h2>
+            {{ total_candidates }}
+        </h2>
+
     </div>
 
-    <div class="card">
-        <p>Interested</p>
-        <h2>{{ interested_count }}</h2>
-    </div>
 
     <div class="card">
-        <p>Wait for Confirmation</p>
-        <h2>{{ waiting_count }}</h2>
+
+        <p>
+            Interested
+        </p>
+
+        <h2>
+            {{ interested_count }}
+        </h2>
+
     </div>
 
+
     <div class="card">
-        <p>Not-Interested</p>
-        <h2>{{ not_interested_count }}</h2>
+
+        <p>
+            Yet to Confirm
+        </p>
+
+        <h2>
+            {{ waiting_count }}
+        </h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <p>
+            Non-Interested
+        </p>
+
+        <h2>
+            {{ not_interested_count }}
+        </h2>
+
     </div>
 
 </section>
+
 
 
 <!-- =====================================================
@@ -49,7 +85,11 @@ Student Management | JET SKILLS
 <section class="panel">
 
     <div class="panel-title">
-        <h2>Candidate Records</h2>
+
+        <h2>
+            Candidate Records
+        </h2>
+
     </div>
 
 
@@ -59,28 +99,49 @@ Student Management | JET SKILLS
 
     <div class="student-toolbar">
 
+
         <form method="GET" class="student-toolbar-left">
 
+
             <input type="text" name="search" value="{{ search }}"
-                placeholder="Search candidate name, contact no., email...">
+                placeholder="Search candidate, contact, counsellor, location or course...">
 
 
             <select name="status" id="statusFilter" onchange="this.form.submit()">
 
-                <option value="">All Status</option>
-                <option value="Interested">Interested</option>
-                <option value="Wait for Confirmation">Wait for Confirmation</option>
-                <option value="Not-Interested">Not-Interested</option>
+                <option value="">
+                    All Status
+                </option>
+
+                <option value="Interested">
+                    Interested
+                </option>
+
+                <option value="Non-Interested">
+                    Non-Interested
+                </option>
+
+                <option value="Yet to Confirm">
+                    Yet to Confirm
+                </option>
 
             </select>
 
+
             <script>
-                document.getElementById('statusFilter').value = "{{ status_filter|escapejs }}";
+
+                document.getElementById(
+                    'statusFilter'
+                ).value =
+                    "{{ status_filter|escapejs }}";
+
             </script>
 
 
             <button type="submit" class="secondary">
+
                 Search
+
             </button>
 
         </form>
@@ -88,19 +149,33 @@ Student Management | JET SKILLS
 
         <div class="student-toolbar-right">
 
+
+            {% if can_export_students %}
+
             <a href="{% url 'export_candidates' %}?search={{ search|urlencode }}&status={{ status_filter|urlencode }}"
                 class="secondary excel-download-btn">
+
                 Excel Download
+
             </a>
 
+            {% endif %}
+
+
+            {% if can_manage_students %}
 
             <button type="button" class="primary" onclick="openCandidateModal()">
-                + Add Candidate
+
+                Add Candidate
+
             </button>
+
+            {% endif %}
 
         </div>
 
     </div>
+
 
 
     <!-- =================================================
@@ -114,15 +189,57 @@ Student Management | JET SKILLS
             <thead>
 
                 <tr>
+
                     <th>S.No</th>
-                    <th>Enquiry Date</th>
-                    <th>Candidate Name</th>
-                    <th>Contact No.</th>
-                    <th>Gender</th>
-                    <th>Qualification</th>
-                    <th>Status</th>
-                    <th>Remark</th>
-                    <th>Action</th>
+
+                    <th>
+                        Enquiry Date
+                    </th>
+
+                    <th>
+                        Counsellor
+                    </th>
+
+                    <th>
+                        Candidate Name
+                    </th>
+
+                    <th>
+                        Contact No.
+                    </th>
+
+                    <th>
+                        Gender
+                    </th>
+
+                    <th>
+                        Qualification
+                    </th>
+
+                    <th>
+                        Father Name
+                    </th>
+
+                    <th>
+                        Location
+                    </th>
+
+                    <th>
+                        Address
+                    </th>
+
+                    <th>
+                        Course
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
                 </tr>
 
             </thead>
@@ -134,90 +251,152 @@ Student Management | JET SKILLS
 
                 <tr>
 
-                    <!-- S.NO -->
 
                     <td>
+
                         {{ forloop.counter0|add:page_obj.start_index }}
+
                     </td>
 
 
-                    <!-- ENQUIRY DATE -->
-
                     <td>
+
                         {{ candidate.enquiry_date|date:"d-m-Y" }}
+
                     </td>
 
 
-                    <!-- CANDIDATE NAME -->
+                    <td>
+
+                        {% if candidate.counsellor %}
+
+                        {% if candidate.counsellor.get_full_name %}
+
+                        {{ candidate.counsellor.get_full_name }}
+
+                        {% else %}
+
+                        {{ candidate.counsellor.username }}
+
+                        {% endif %}
+
+                        {% else %}
+
+                        -
+
+                        {% endif %}
+
+                    </td>
+
 
                     <td>
+
                         {{ candidate.candidate_name }}
+
                     </td>
 
 
-                    <!-- CONTACT NUMBER -->
-
                     <td>
+
                         {{ candidate.contact_no }}
+
                     </td>
 
 
-                    <!-- GENDER -->
-
                     <td>
+
                         {{ candidate.gender|default:"-" }}
+
                     </td>
 
 
-                    <!-- QUALIFICATION -->
-
                     <td>
+
                         {{ candidate.qualification|default:"-" }}
+
                     </td>
 
 
-                    <!-- STATUS -->
+                    <td>
+
+                        {{ candidate.guardian_name|default:"-" }}
+
+                    </td>
+
 
                     <td>
+
+                        {% if candidate.location == 'Others' %}
+
+                        {{ candidate.other_location|default:"-" }}
+
+                        {% else %}
+
+                        {{ candidate.location|default:"-" }}
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ candidate.address|default:"-" }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ candidate.course_interested|default:"-" }}
+
+                    </td>
+
+
+                    <td>
+
                         {{ candidate.status|default:"-" }}
+
                     </td>
 
 
-                    <!-- REMARK -->
-
-                    <td>
-                        {{ candidate.remark|default:"-" }}
-                    </td>
-
-
-                    <!-- ACTION -->
-
                     <td>
 
-                        <!-- EDIT -->
+
+                        {% if can_manage_students %}
 
                         <button type="button" class="action-btn edit-candidate-btn" data-id="{{ candidate.id }}"
                             data-enquiry-date="{{ candidate.enquiry_date|date:'Y-m-d' }}"
+                            data-counsellor="{{ candidate.counsellor_id|default:'' }}"
                             data-candidate-name="{{ candidate.candidate_name }}"
-                            data-contact-no="{{ candidate.contact_no }}" data-email="{{ candidate.email }}"
-                            data-gender="{{ candidate.gender }}" data-dob="{{ candidate.dob|date:'Y-m-d' }}"
+                            data-contact-no="{{ candidate.contact_no }}" data-gender="{{ candidate.gender }}"
                             data-qualification="{{ candidate.qualification }}"
-                            data-guardian-name="{{ candidate.guardian_name }}"
-                            data-guardian-contact="{{ candidate.guardian_contact_no }}"
-                            data-address="{{ candidate.address }}" data-status="{{ candidate.status }}"
-                            data-remark="{{ candidate.remark }}" onclick="openEditCandidate(this)">
+                            data-guardian-name="{{ candidate.guardian_name }}" data-location="{{ candidate.location }}"
+                            data-other-location="{{ candidate.other_location }}" data-address="{{ candidate.address }}"
+                            data-course-interested="{{ candidate.course_interested }}"
+                            data-family-annual-income="{{ candidate.family_annual_income|default:'' }}"
+                            data-skill-preference="{{ candidate.skill_preference }}"
+                            data-status="{{ candidate.status }}" data-remark="{{ candidate.remark }}"
+                            onclick="openEditCandidate(this)">
+
                             Edit
+
                         </button>
 
-                        <!-- ASSIGN -->
+                        {% endif %}
+
+
 
                         <button type="button" class="action-btn"
                             onclick="alert('Batch assignment will be enabled after the Training / Batch module is created.')">
+
                             Assign
+
                         </button>
 
 
-                        <!-- DELETE -->
+
+                        {% if can_delete_students %}
 
                         <form method="POST" action="{% url 'delete_candidate' candidate.id %}" style="display:inline;"
                             onsubmit="return confirm('Are you sure you want to delete this candidate?');">
@@ -225,10 +404,15 @@ Student Management | JET SKILLS
                             {% csrf_token %}
 
                             <button type="submit" class="action-btn delete">
+
                                 Delete
+
                             </button>
 
                         </form>
+
+                        {% endif %}
+
 
                     </td>
 
@@ -239,8 +423,10 @@ Student Management | JET SKILLS
 
                 <tr>
 
-                    <td colspan="9" class="empty">
+                    <td colspan="13" class="empty">
+
                         No candidate records found.
+
                     </td>
 
                 </tr>
@@ -254,78 +440,109 @@ Student Management | JET SKILLS
     </div>
 
 
+
     <!-- =================================================
-     PAGINATION
-================================================== -->
+         PAGINATION
+    ================================================== -->
 
     <div class="pagination">
 
 
         <div class="table-options">
 
-            <span>Show</span>
+            <span>
+                Show
+            </span>
 
             <select id="pageSize" onchange="changePageSize(this.value)">
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
+
+                <option value="10">
+                    10
+                </option>
+
+                <option value="20">
+                    20
+                </option>
+
+                <option value="50">
+                    50
+                </option>
+
             </select>
 
-            <span>entries</span>
+            <span>
+                entries
+            </span>
 
         </div>
 
+
         <span>
+
             Showing
+
             {{ page_obj.start_index }}
+
             -
+
             {{ page_obj.end_index }}
+
             of
+
             {{ page_obj.paginator.count }}
+
             records
+
         </span>
+
 
         <div>
 
-            <!-- PREVIOUS -->
 
             {% if page_obj.has_previous %}
 
             <a class="pagination-link"
                 href="?page={{ page_obj.previous_page_number }}&page_size={{ page_size }}&search={{ search|urlencode }}&status={{ status_filter|urlencode }}">
+
                 Previous
+
             </a>
 
             {% else %}
 
             <span class="pagination-link disabled">
+
                 Previous
+
             </span>
 
             {% endif %}
 
 
-            <!-- PAGE NUMBER -->
-
             <span class="page-number">
+
                 Page {{ page_obj.number }}
+
                 of {{ page_obj.paginator.num_pages }}
+
             </span>
 
-
-            <!-- NEXT -->
 
             {% if page_obj.has_next %}
 
             <a class="pagination-link"
                 href="?page={{ page_obj.next_page_number }}&page_size={{ page_size }}&search={{ search|urlencode }}&status={{ status_filter|urlencode }}">
+
                 Next
+
             </a>
 
             {% else %}
 
             <span class="pagination-link disabled">
+
                 Next
+
             </span>
 
             {% endif %}
@@ -337,16 +554,16 @@ Student Management | JET SKILLS
 </section>
 
 
+
 <!-- =====================================================
      ADD / EDIT CANDIDATE MODAL
 ===================================================== -->
 
 <div class="modal" id="candidateModal">
 
+
     <div class="modal-box">
 
-
-        <!-- MODAL HEADER -->
 
         <div class="modal-head">
 
@@ -356,17 +573,21 @@ Student Management | JET SKILLS
 
 
             <button type="button" class="close" onclick="closeCandidateModal()">
+
                 &times;
+
             </button>
 
         </div>
 
 
-        <!-- FORM -->
 
         <form method="POST" id="candidateForm" action="{% url 'add_candidate' %}">
 
+
             {% csrf_token %}
+
+            <input type="hidden" name="calling_task_id" id="callingTaskId" value="">
 
 
             <div class="form-grid">
@@ -392,6 +613,55 @@ Student Management | JET SKILLS
                 </div>
 
 
+
+                <!-- COUNSELLOR -->
+
+                <div class="field">
+
+                    <label>
+
+                        Counsellor Name
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <select name="counsellor" id="counsellor" required>
+
+
+                        <option value="">
+                            Select Counsellor
+                        </option>
+
+
+                        {% for counsellor in counsellors %}
+
+                        <option value="{{ counsellor.id }}">
+
+                            {% if counsellor.get_full_name %}
+
+                            {{ counsellor.get_full_name }}
+
+                            {% else %}
+
+                            {{ counsellor.username }}
+
+                            {% endif %}
+
+                        </option>
+
+                        {% endfor %}
+
+
+                    </select>
+
+                </div>
+
+
+
                 <!-- CANDIDATE NAME -->
 
                 <div class="field">
@@ -412,6 +682,7 @@ Student Management | JET SKILLS
                 </div>
 
 
+
                 <!-- CONTACT NUMBER -->
 
                 <div class="field">
@@ -427,23 +698,11 @@ Student Management | JET SKILLS
                     </label>
 
 
-                    <input type="text" name="contact_no" id="contactNo" maxlength="15" required>
+                    <input type="text" name="contact_no" id="contactNo" maxlength="10" minlength="10"
+                        pattern="[0-9]{10}" inputmode="numeric" placeholder="Enter 10 digit number" required>
 
                 </div>
 
-
-                <!-- EMAIL -->
-
-                <div class="field">
-
-                    <label>
-                        Email
-                    </label>
-
-
-                    <input type="email" name="email" id="email">
-
-                </div>
 
 
                 <!-- GENDER -->
@@ -451,11 +710,18 @@ Student Management | JET SKILLS
                 <div class="field">
 
                     <label>
-                        Gender <span class="required">*</span>
+
+                        Gender
+
+                        <span class="required">
+                            *
+                        </span>
+
                     </label>
 
 
                     <select name="gender" id="gender" required>
+
 
                         <option value="">
                             Select Gender
@@ -469,27 +735,15 @@ Student Management | JET SKILLS
                             Female
                         </option>
 
-                        <option value="Other">
-                            Other
+                        <option value="Others">
+                            Others
                         </option>
+
 
                     </select>
 
                 </div>
 
-
-                <!-- DOB -->
-
-                <div class="field">
-
-                    <label>
-                        DOB
-                    </label>
-
-
-                    <input type="date" name="dob" id="dob">
-
-                </div>
 
 
                 <!-- QUALIFICATION -->
@@ -501,44 +755,49 @@ Student Management | JET SKILLS
                     </label>
 
 
-                    <input type="text" name="qualification" id="qualification">
+                    <select name="qualification" id="qualification">
 
-                </div>
-
-
-                <!-- STATUS -->
-
-                <div class="field">
-
-                    <label>
-                        Status <span class="required">*</span>
-                    </label>
-
-
-                    <select name="status" id="status" required>
 
                         <option value="">
-                            Select Status
+                            Select Qualification
                         </option>
 
-                        <option value="Interested">
-                            Interested
+                        <option value="Below 5">
+                            Below 5
                         </option>
 
-                        <option value="Wait for Confirmation">
-                            Wait for Confirmation
+                        <option value="5-9">
+                            5-9
                         </option>
 
-                        <option value="Not-Interested">
-                            Not-Interested
+                        <option value="10th">
+                            10th
                         </option>
+
+                        <option value="12th">
+                            12th
+                        </option>
+
+                        <option value="Diploma">
+                            Diploma
+                        </option>
+
+                        <option value="Graduate">
+                            Graduate
+                        </option>
+
+                        <option value="Post Graduate">
+                            Post Graduate
+                        </option>
+
 
                     </select>
 
                 </div>
 
 
-                <!-- FATHER / GUARDIAN NAME -->
+
+                <!-- FATHER / GUARDIAN -->
 
                 <div class="field">
 
@@ -547,23 +806,89 @@ Student Management | JET SKILLS
                     </label>
 
 
-                    <input type="text" name="guardian_name" id="guardianName">
+                    <input type="text" name="guardian_name" id="guardianName"
+                        placeholder="Enter father / guardian name">
 
                 </div>
 
 
-                <!-- FATHER / GUARDIAN CONTACT -->
+
+                <!-- LOCATION -->
 
                 <div class="field">
 
                     <label>
-                        Father / Guardian Contact No.
+                        Location
                     </label>
 
 
-                    <input type="text" name="guardian_contact_no" id="guardianContact" maxlength="15">
+                    <select name="location" id="location" onchange="toggleOtherLocation()">
+
+
+                        <option value="">
+                            Select Location
+                        </option>
+
+                        <option value="Theru Veerapandiya Puram">
+                            Theru Veerapandiya Puram
+                        </option>
+
+                        <option value="A. KumaraReddiyapuram">
+                            A. KumaraReddiyapuram
+                        </option>
+
+                        <option value="T. Kumaragiri">
+                            T. Kumaragiri
+                        </option>
+
+                        <option value="Milavittan">
+                            Milavittan
+                        </option>
+
+                        <option value="Silverpuram">
+                            Silverpuram
+                        </option>
+
+                        <option value="Pandarampatti">
+                            Pandarampatti
+                        </option>
+
+                        <option value="Therespuram">
+                            Therespuram
+                        </option>
+
+                        <option value="Anna Colony">
+                            Anna Colony
+                        </option>
+
+                        <option value="Inigo Nagar">
+                            Inigo Nagar
+                        </option>
+
+                        <option value="Others">
+                            Others
+                        </option>
+
+
+                    </select>
 
                 </div>
+
+
+
+                <!-- OTHER LOCATION -->
+
+                <div class="field" id="otherLocationField" style="display:none;">
+
+                    <label>
+                        Other Location
+                    </label>
+
+
+                    <input type="text" name="other_location" id="otherLocation" placeholder="Enter location">
+
+                </div>
+
 
 
                 <!-- ADDRESS -->
@@ -575,9 +900,181 @@ Student Management | JET SKILLS
                     </label>
 
 
-                    <textarea name="address" id="address" rows="3"></textarea>
+                    <textarea name="address" id="address" rows="3" placeholder="Enter complete address"></textarea>
 
                 </div>
+
+
+
+                <!-- COURSE -->
+
+                <div class="field">
+
+                    <label>
+                        Course Interested
+                    </label>
+
+
+                    <select name="course_interested" id="courseInterested">
+
+
+                        <option value="">
+                            Select Course
+                        </option>
+
+                        <option value="Tailoring & Fashion Design">
+                            Tailoring & Fashion Design
+                        </option>
+
+                        <option value="Computer / Tally / Accounts">
+                            Computer / Tally / Accounts
+                        </option>
+
+                        <option value="Beauty & Wellness">
+                            Beauty & Wellness
+                        </option>
+
+                        <option value="Retail & Sales">
+                            Retail & Sales
+                        </option>
+
+                        <option value="Electrician">
+                            Electrician
+                        </option>
+
+                        <option value="Fitter / Welder">
+                            Fitter / Welder
+                        </option>
+
+                        <option value="Industrial Safety">
+                            Industrial Safety
+                        </option>
+
+                        <option value="Logistics & Warehousing">
+                            Logistics & Warehousing
+                        </option>
+
+                        <option value="Solar Technician">
+                            Solar Technician
+                        </option>
+
+                        <option value="Driving (LMV / HMV)">
+                            Driving (LMV / HMV)
+                        </option>
+
+                        <option value="Healthcare Assistant">
+                            Healthcare Assistant
+                        </option>
+
+                        <option value="Hospitality">
+                            Hospitality
+                        </option>
+
+                        <option value="Mobile Repair">
+                            Mobile Repair
+                        </option>
+
+                        <option value="Fish Processing & Value Addition">
+                            Fish Processing & Value Addition
+                        </option>
+
+                        <option value="Spoken English">
+                            Spoken English
+                        </option>
+
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- FAMILY ANNUAL INCOME -->
+
+                <div class="field">
+
+                    <label>
+                        Family Annual Income
+                    </label>
+
+
+                    <input type="number" name="family_annual_income" id="familyAnnualIncome" min="0" step="1"
+                        inputmode="numeric" placeholder="Enter annual income">
+
+                </div>
+
+
+
+                <!-- SKILL PREFERENCE -->
+
+                <div class="field">
+
+                    <label>
+                        Skill Preference
+                    </label>
+
+
+                    <select name="skill_preference" id="skillPreference">
+
+
+                        <option value="">
+                            Select Skill Preference
+                        </option>
+
+                        <option value="Fresh Skills Required">
+                            Fresh Skills Required
+                        </option>
+
+                        <option value="Skilled only Certificate required">
+                            Skilled only Certificate required
+                        </option>
+
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- STATUS -->
+
+                <div class="field">
+
+                    <label>
+
+                        Status
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <select name="status" id="status" required>
+
+
+                        <option value="">
+                            Select Status
+                        </option>
+
+                        <option value="Interested">
+                            Interested
+                        </option>
+
+                        <option value="Non-Interested">
+                            Non-Interested
+                        </option>
+
+                        <option value="Yet to Confirm">
+                            Yet to Confirm
+                        </option>
+
+
+                    </select>
+
+                </div>
+
 
 
                 <!-- REMARK -->
@@ -589,27 +1086,34 @@ Student Management | JET SKILLS
                     </label>
 
 
-                    <textarea name="remark" id="remark" rows="3"></textarea>
+                    <textarea name="remark" id="remark" rows="3" placeholder="Enter remarks"></textarea>
 
                 </div>
+
 
             </div>
 
 
-            <!-- FORM BUTTONS -->
 
             <div class="form-actions">
 
+
                 <button type="button" class="secondary" onclick="closeCandidateModal()">
+
                     Cancel
+
                 </button>
 
 
                 <button type="submit" class="primary">
+
                     Save Candidate
+
                 </button>
 
+
             </div>
+
 
         </form>
 
@@ -617,16 +1121,64 @@ Student Management | JET SKILLS
 
 </div>
 
+
 {% endblock %}
 
 
-<!-- =====================================================
-     JAVASCRIPT
-===================================================== -->
 
 {% block scripts %}
 
+
 <script>
+
+
+    /* =====================================================
+       OTHER LOCATION
+    ===================================================== */
+
+    function toggleOtherLocation() {
+
+        const location =
+            document.getElementById(
+                'location'
+            );
+
+        const otherField =
+            document.getElementById(
+                'otherLocationField'
+            );
+
+        const otherInput =
+            document.getElementById(
+                'otherLocation'
+            );
+
+
+        if (
+            location.value === 'Others'
+        ) {
+
+            otherField.style.display =
+                'block';
+
+            otherInput.required =
+                true;
+
+        } else {
+
+            otherField.style.display =
+                'none';
+
+            otherInput.required =
+                false;
+
+            otherInput.value =
+                '';
+
+        }
+
+    }
+
 
 
     /* =====================================================
@@ -635,27 +1187,71 @@ Student Management | JET SKILLS
 
     function openCandidateModal() {
 
-        const modal = document.getElementById('candidateModal');
-        const form = document.getElementById('candidateForm');
+        unlockCallingTaskFields();
 
-        document.getElementById('modalTitle').textContent = 'Add Candidate';
+        const modal =
+            document.getElementById(
+                'candidateModal'
+            );
+
+        const form =
+            document.getElementById(
+                'candidateForm'
+            );
+
+
+        document.getElementById(
+            'modalTitle'
+        ).textContent =
+            'Add Candidate';
+
 
         form.reset();
 
-        form.action = "{% url 'add_candidate' %}";
 
-        // Automatically set system date
-        const today = new Date();
+        form.action =
+            "{% url 'add_candidate' %}";
 
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
 
-        document.getElementById('enquiryDate').value =
+        toggleOtherLocation();
+
+
+        const today =
+            new Date();
+
+
+        const year =
+            today.getFullYear();
+
+        const month =
+            String(
+                today.getMonth() + 1
+            ).padStart(
+                2,
+                '0'
+            );
+
+        const day =
+            String(
+                today.getDate()
+            ).padStart(
+                2,
+                '0'
+            );
+
+
+        document.getElementById(
+            'enquiryDate'
+        ).value =
             `${year}-${month}-${day}`;
 
-        modal.classList.add('show');
+
+        modal.classList.add(
+            'show'
+        );
+
     }
+
 
 
     /* =====================================================
@@ -673,6 +1269,7 @@ Student Management | JET SKILLS
     }
 
 
+
     /* =====================================================
        EDIT CANDIDATE
     ===================================================== */
@@ -683,7 +1280,6 @@ Student Management | JET SKILLS
             document.getElementById(
                 'candidateModal'
             );
-
 
         const form =
             document.getElementById(
@@ -703,100 +1299,147 @@ Student Management | JET SKILLS
             "/";
 
 
-        /* ENQUIRY DATE */
-
         document.getElementById(
             'enquiryDate'
         ).value =
-            button.dataset.enquiryDate || '';
+            button.dataset.enquiryDate ||
+            '';
 
 
-        /* CANDIDATE NAME */
+        document.getElementById(
+            'counsellor'
+        ).value =
+            button.dataset.counsellor ||
+            '';
+
 
         document.getElementById(
             'candidateName'
         ).value =
-            button.dataset.candidateName || '';
+            button.dataset.candidateName ||
+            '';
 
-
-        /* CONTACT */
 
         document.getElementById(
             'contactNo'
         ).value =
-            button.dataset.contactNo || '';
+            button.dataset.contactNo ||
+            '';
 
-
-        /* EMAIL */
-
-        document.getElementById(
-            'email'
-        ).value =
-            button.dataset.email || '';
-
-
-        /* GENDER */
 
         document.getElementById(
             'gender'
         ).value =
-            button.dataset.gender || '';
+            button.dataset.gender ||
+            '';
 
-
-        /* DOB */
-
-        document.getElementById(
-            'dob'
-        ).value =
-            button.dataset.dob || '';
-
-
-        /* QUALIFICATION */
 
         document.getElementById(
             'qualification'
         ).value =
-            button.dataset.qualification || '';
+            button.dataset.qualification ||
+            '';
 
-
-        /* GUARDIAN NAME */
 
         document.getElementById(
             'guardianName'
         ).value =
-            button.dataset.guardianName || '';
+            button.dataset.guardianName ||
+            '';
 
-
-        /* GUARDIAN CONTACT */
 
         document.getElementById(
-            'guardianContact'
+            'location'
         ).value =
-            button.dataset.guardianContact || '';
+            button.dataset.location ||
+            '';
 
 
-        /* ADDRESS */
+        document.getElementById(
+            'otherLocation'
+        ).value =
+            button.dataset.otherLocation ||
+            '';
+
 
         document.getElementById(
             'address'
         ).value =
-            button.dataset.address || '';
+            button.dataset.address ||
+            '';
 
 
-        /* STATUS */
+        document.getElementById(
+            'courseInterested'
+        ).value =
+            button.dataset.courseInterested ||
+            '';
+
+
+        document.getElementById(
+            'familyAnnualIncome'
+        ).value =
+            button.dataset.familyAnnualIncome ||
+            '';
+
+
+        document.getElementById(
+            'skillPreference'
+        ).value =
+            button.dataset.skillPreference ||
+            '';
+
 
         document.getElementById(
             'status'
         ).value =
-            button.dataset.status || '';
+            button.dataset.status ||
+            '';
 
-
-        /* REMARK */
 
         document.getElementById(
             'remark'
         ).value =
-            button.dataset.remark || '';
+            button.dataset.remark ||
+            '';
+
+
+        /*
+         * Show Other Location without
+         * deleting its existing value.
+         */
+
+        const otherField =
+            document.getElementById(
+                'otherLocationField'
+            );
+
+        const otherInput =
+            document.getElementById(
+                'otherLocation'
+            );
+
+
+        if (
+            button.dataset.location ===
+            'Others'
+        ) {
+
+            otherField.style.display =
+                'block';
+
+            otherInput.required =
+                true;
+
+        } else {
+
+            otherField.style.display =
+                'none';
+
+            otherInput.required =
+                false;
+
+        }
 
 
         modal.classList.add(
@@ -806,8 +1449,58 @@ Student Management | JET SKILLS
     }
 
 
+
     /* =====================================================
-       CLOSE MODAL WHEN CLICKING OUTSIDE
+       CONTACT - NUMBERS ONLY
+    ===================================================== */
+
+    document.getElementById(
+        'contactNo'
+    ).addEventListener(
+        'input',
+        function () {
+
+            this.value =
+                this.value
+                    .replace(
+                        /\D/g,
+                        ''
+                    )
+                    .slice(
+                        0,
+                        10
+                    );
+
+        }
+    );
+
+
+
+    /* =====================================================
+       FAMILY INCOME - NUMBERS ONLY
+    ===================================================== */
+
+    document.getElementById(
+        'familyAnnualIncome'
+    ).addEventListener(
+        'input',
+        function () {
+
+            if (
+                Number(this.value) < 0
+            ) {
+
+                this.value = '';
+
+            }
+
+        }
+    );
+
+
+
+    /* =====================================================
+       CLOSE WHEN CLICKING OUTSIDE
     ===================================================== */
 
     window.addEventListener(
@@ -831,21 +1524,36 @@ Student Management | JET SKILLS
         }
     );
 
+
+
     /* =====================================================
-   PAGE SIZE - 10 / 20 / 50
-===================================================== */
+       PAGE SIZE
+    ===================================================== */
 
     function changePageSize(size) {
 
-        const params = new URLSearchParams(
-            window.location.search
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+
+        params.set(
+            'page_size',
+            size
         );
 
-        params.set('page_size', size);
-        params.set('page', '1');
+        params.set(
+            'page',
+            '1'
+        );
 
-        window.location.search = params.toString();
+
+        window.location.search =
+            params.toString();
+
     }
+
 
 
     document.addEventListener(
@@ -853,11 +1561,245 @@ Student Management | JET SKILLS
         function () {
 
             const pageSize =
-                document.getElementById('pageSize');
+                document.getElementById(
+                    'pageSize'
+                );
+
 
             if (pageSize) {
+
                 pageSize.value =
                     "{{ page_size|escapejs }}";
+
+            }
+
+        }
+    );
+
+    /* =====================================================
+       CALLING TASK -> ADD CANDIDATE
+    ===================================================== */
+
+    function unlockCallingTaskFields() {
+
+        const counsellor =
+            document.getElementById(
+                'counsellor'
+            );
+
+        const candidateName =
+            document.getElementById(
+                'candidateName'
+            );
+
+        const contactNo =
+            document.getElementById(
+                'contactNo'
+            );
+
+
+        if (counsellor) {
+
+            counsellor.disabled = false;
+
+        }
+
+
+        if (candidateName) {
+
+            candidateName.readOnly = false;
+
+        }
+
+
+        if (contactNo) {
+
+            contactNo.readOnly = false;
+
+        }
+
+
+        const taskInput =
+            document.getElementById(
+                'callingTaskId'
+            );
+
+
+        if (taskInput) {
+
+            taskInput.value = '';
+
+        }
+
+    }
+
+
+
+    function openCallingTaskCandidate() {
+
+        const modal =
+            document.getElementById(
+                'candidateModal'
+            );
+
+        const form =
+            document.getElementById(
+                'candidateForm'
+            );
+
+
+        if (!modal || !form) {
+
+            return;
+
+        }
+
+
+        form.reset();
+
+
+        form.action =
+            "{% url 'add_candidate' %}";
+
+
+        document.getElementById(
+            'modalTitle'
+        ).textContent =
+            'Update Candidate';
+
+
+
+        /* CALLING TASK ID */
+
+        document.getElementById(
+            'callingTaskId'
+        ).value =
+            "{{ calling_task.id|default:''|escapejs }}";
+
+
+
+        /* SYSTEM DATE */
+
+        const today =
+            new Date();
+
+
+        const year =
+            today.getFullYear();
+
+
+        const month =
+            String(
+                today.getMonth() + 1
+            ).padStart(
+                2,
+                '0'
+            );
+
+
+        const day =
+            String(
+                today.getDate()
+            ).padStart(
+                2,
+                '0'
+            );
+
+
+        document.getElementById(
+            'enquiryDate'
+        ).value =
+            year +
+            '-' +
+            month +
+            '-' +
+            day;
+
+
+
+        /* COUNSELLOR */
+
+        const counsellor =
+            document.getElementById(
+                'counsellor'
+            );
+
+
+        if (counsellor) {
+
+            counsellor.value =
+                "{{ calling_task.counsellor_id|default:''|escapejs }}";
+
+            counsellor.disabled =
+                true;
+
+        }
+
+
+
+        /* CANDIDATE NAME */
+
+        const candidateName =
+            document.getElementById(
+                'candidateName'
+            );
+
+
+        if (candidateName) {
+
+            candidateName.value =
+                "{{ calling_task.candidate_name|default:''|escapejs }}";
+
+            candidateName.readOnly =
+                true;
+
+        }
+
+
+
+        /* CONTACT NUMBER */
+
+        const contactNo =
+            document.getElementById(
+                'contactNo'
+            );
+
+
+        if (contactNo) {
+
+            contactNo.value =
+                "{{ calling_task.mobile|default:''|escapejs }}";
+
+            contactNo.readOnly =
+                true;
+
+        }
+
+
+        modal.classList.add(
+            'show'
+        );
+
+    }
+
+
+
+    /* =====================================================
+       AUTO OPEN WHEN COMING FROM CALLING TASK
+    ===================================================== */
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        function () {
+
+            const callingTaskId =
+                "{{ calling_task.id|default:''|escapejs }}";
+
+
+            if (callingTaskId) {
+
+                openCallingTaskCandidate();
+
             }
 
         }
@@ -865,5 +1807,6 @@ Student Management | JET SKILLS
 
 
 </script>
+
 
 {% endblock %}

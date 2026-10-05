@@ -1,0 +1,527 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+Calling Task | JET SKILLS
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="calling-page">
+
+
+    <!-- ==========================================
+         HEADER
+    =========================================== -->
+
+    <header class="calling-header">
+
+        <div>
+
+            <h1>
+                Calling Task
+            </h1>
+
+            <p>
+                Assigned calling contacts
+            </p>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- ==========================================
+         SUMMARY CARDS
+    =========================================== -->
+
+    <section class="calling-summary">
+
+
+        <div class="calling-card">
+
+            <p>
+                Total Assigned
+            </p>
+
+            <h2>
+                {{ total_assigned }}
+            </h2>
+
+        </div>
+
+
+        <div class="calling-card">
+
+            <p>
+                Pending
+            </p>
+
+            <h2>
+                {{ pending_count }}
+            </h2>
+
+        </div>
+
+
+        <div class="calling-card">
+
+            <p>
+                Completed
+            </p>
+
+            <h2>
+                {{ completed_count }}
+            </h2>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- ==========================================
+         TABLE PANEL
+    =========================================== -->
+
+    <section class="calling-panel">
+
+
+        <div class="calling-panel-head">
+
+            <div>
+
+                <h2>
+                    Pending Calling List
+                </h2>
+
+                <p>
+                    Contacts waiting for counselling update
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ======================================
+             FILTER BAR
+        ======================================= -->
+
+        <form method="GET" class="calling-toolbar">
+
+
+            <div class="calling-search">
+
+                <input type="text" name="search" value="{{ search }}"
+                    placeholder="Search name, mobile, reg. no. or ref">
+
+            </div>
+
+
+            <div class="calling-page-size">
+
+                <label>
+                    Show
+                </label>
+
+
+                <select name="page_size" id="callingPageSize" onchange="this.form.submit()">
+
+                    <option value="10">
+                        10
+                    </option>
+
+                    <option value="20">
+                        20
+                    </option>
+
+                    <option value="30">
+                        30
+                    </option>
+
+                    <option value="50">
+                        50
+                    </option>
+
+                    <option value="100">
+                        100
+                    </option>
+
+                </select>
+
+
+                <span>
+                    entries
+                </span>
+
+            </div>
+
+
+            <button type="submit" class="calling-search-btn">
+
+                Search
+
+            </button>
+
+
+            {% if search %}
+
+            <a href="{% url 'calling:task_list' %}" class="calling-clear-btn">
+
+                Clear
+
+            </a>
+
+            {% endif %}
+
+
+        </form>
+
+
+
+        <!-- ======================================
+             TABLE
+        ======================================= -->
+
+        <div class="calling-table-wrap">
+
+
+            <table class="calling-table">
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            S.No
+                        </th>
+
+                        <th>
+                            Reg. No
+                        </th>
+
+                        <th>
+                            Ref
+                        </th>
+
+                        <th>
+                            Name
+                        </th>
+
+                        <th>
+                            Mobile
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                    {% for task in page_obj %}
+
+
+                    <tr>
+
+
+                        <td class="calling-serial">
+
+                            {{ page_obj.start_index|add:forloop.counter0 }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ task.reg_no|default:"-" }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ task.reference|default:"-" }}
+
+                        </td>
+
+
+                        <td class="calling-name">
+
+                            {{ task.candidate_name }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ task.mobile }}
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="calling-status pending">
+
+                                {{ task.status }}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <a href="{% url 'student_list' %}?calling_task={{ task.id }}" class="calling-update-btn">
+
+                                Update
+
+                            </a>
+
+                        </td>
+
+
+                    </tr>
+
+
+                    {% empty %}
+
+
+                    <tr>
+
+                        <td colspan="7" class="calling-empty">
+
+                            No pending calling tasks found.
+
+                        </td>
+
+                    </tr>
+
+
+                    {% endfor %}
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+
+        <!-- ======================================
+             PAGINATION
+        ======================================= -->
+
+        {% if page_obj.paginator.count %}
+
+
+        <div class="calling-pagination">
+
+
+            <!-- LEFT -->
+
+            <div class="calling-pagination-info">
+
+                Showing
+
+                <strong>
+                    {{ page_obj.start_index }}
+                </strong>
+
+                to
+
+                <strong>
+                    {{ page_obj.end_index }}
+                </strong>
+
+                of
+
+                <strong>
+                    {{ page_obj.paginator.count }}
+                </strong>
+
+                pending records
+
+            </div>
+
+
+
+            <!-- RIGHT -->
+
+            {% if page_obj.paginator.num_pages > 1 %}
+
+            <div class="calling-pagination-buttons">
+
+
+                <!-- FIRST -->
+
+                {% if page_obj.has_previous %}
+
+                <a href="?page=1&page_size={{ page_size }}&search={{ search|urlencode }}" class="calling-page-btn">
+
+                    First
+
+                </a>
+
+
+                <!-- PREVIOUS -->
+
+                <a href="?page={{ page_obj.previous_page_number }}&page_size={{ page_size }}&search={{ search|urlencode }}"
+                    class="calling-page-btn">
+
+                    ‹
+
+                </a>
+
+                {% else %}
+
+
+                <span class="calling-page-btn disabled">
+
+                    First
+
+                </span>
+
+
+                <span class="calling-page-btn disabled">
+
+                    ‹
+
+                </span>
+
+
+                {% endif %}
+
+
+
+                <!-- CURRENT PAGE -->
+
+                <span class="calling-page-current">
+
+                    {{ page_obj.number }}
+
+                </span>
+
+
+
+                <!-- TOTAL PAGE -->
+
+                <span class="calling-page-total">
+
+                    of {{ page_obj.paginator.num_pages }}
+
+                </span>
+
+
+
+                <!-- NEXT -->
+
+                {% if page_obj.has_next %}
+
+                <a href="?page={{ page_obj.next_page_number }}&page_size={{ page_size }}&search={{ search|urlencode }}"
+                    class="calling-page-btn">
+
+                    ›
+
+                </a>
+
+
+                <!-- LAST -->
+
+                <a href="?page={{ page_obj.paginator.num_pages }}&page_size={{ page_size }}&search={{ search|urlencode }}"
+                    class="calling-page-btn">
+
+                    Last
+
+                </a>
+
+                {% else %}
+
+
+                <span class="calling-page-btn disabled">
+
+                    ›
+
+                </span>
+
+
+                <span class="calling-page-btn disabled">
+
+                    Last
+
+                </span>
+
+
+                {% endif %}
+
+
+            </div>
+
+            {% endif %}
+
+
+        </div>
+
+
+        {% endif %}
+
+
+    </section>
+
+
+</div>
+
+
+{% endblock %}
+
+
+
+{% block scripts %}
+
+
+<script>
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        function () {
+
+            const pageSize =
+                document.getElementById(
+                    'callingPageSize'
+                );
+
+
+            if (pageSize) {
+
+                pageSize.value =
+                    "{{ page_size|escapejs }}";
+
+            }
+
+        }
+    );
+
+</script>
+
+
+{% endblock %}

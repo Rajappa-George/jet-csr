@@ -1,0 +1,76 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | JET SKILLS</title>
+
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+</head>
+
+<body class="login-page">
+
+    <div class="login-card">
+
+        <div class="login-brand">
+
+            <img src="{% static 'images/logo.png' %}" alt="JET SKILLS">
+
+            <h1>JET SKILLS</h1>
+
+            <p>CSR – Tuticorin</p>
+
+        </div>
+
+
+        {% if error %}
+
+        <div class="login-error">
+            {{ error }}
+        </div>
+
+        {% endif %}
+
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="login-field">
+
+                <label>Username</label>
+
+                <input type="text" name="username" placeholder="Enter username" required autofocus>
+
+            </div>
+
+
+            <div class="login-field">
+
+                <label>Password</label>
+
+                <input type="password" name="password" placeholder="Enter password" required>
+
+            </div>
+
+
+            <button type="submit" class="primary login-button">
+                Login
+            </button>
+
+        </form>
+
+    </div>
+
+</body>
+
+</html>

@@ -2,8 +2,11 @@
 
 
 {% block title %}
+
 Dashboard | JET SKILLS
+
 {% endblock %}
+
 
 
 {% block content %}
@@ -13,54 +16,90 @@ Dashboard | JET SKILLS
 
     <div>
 
-        <h1>Dashboard</h1>
+        <h1>
+            Dashboard
+        </h1>
 
-        <p>CSR – Tuticorin Candidate Management</p>
+
+        {% if is_counsellor %}
+
+        <p>
+            My Calling & Candidate Overview
+        </p>
+
+        {% else %}
+
+        <p>
+            CSR – Tuticorin Candidate Management
+        </p>
+
+        {% endif %}
 
     </div>
 
-    <span>Super Admin</span>
+
+    {% if is_counsellor %}
+    <span>{{ current_role }}</span>
+    {% endif %}
 
 </header>
 
 
-<!-- SUMMARY CARDS -->
+
+{% if is_counsellor %}
+
+
+<!-- =====================================================
+     COUNSELLOR - CALLING SUMMARY
+===================================================== -->
+
+<div class="panel-title">
+
+    <h2>
+        Today's Calling Summary
+    </h2>
+
+</div>
+
 
 <section class="cards">
 
 
     <div class="card">
 
-        <p>Total Candidates</p>
+        <p>
+            Assigned Calls
+        </p>
 
-        <h2>0</h2>
-
-    </div>
-
-
-    <div class="card">
-
-        <p>Interested</p>
-
-        <h2>0</h2>
+        <h2>
+            {{ today_assigned }}
+        </h2>
 
     </div>
 
 
     <div class="card">
 
-        <p>Wait for Confirmation</p>
+        <p>
+            Completed Calls
+        </p>
 
-        <h2>0</h2>
+        <h2>
+            {{ today_completed }}
+        </h2>
 
     </div>
 
 
     <div class="card">
 
-        <p>Not-Interested</p>
+        <p>
+            Pending Calls
+        </p>
 
-        <h2>0</h2>
+        <h2>
+            {{ today_pending }}
+        </h2>
 
     </div>
 
@@ -68,21 +107,182 @@ Dashboard | JET SKILLS
 </section>
 
 
-<section class="panel">
+
+<!-- =====================================================
+     COUNSELLOR - CANDIDATE SUMMARY
+===================================================== -->
+
+<div class="panel-title" style="margin-top: 25px;">
+
+    <h2>
+        My Candidate Summary
+    </h2>
+
+</div>
+
+
+<section class="cards">
+
+
+    <div class="card">
+
+        <p>
+            Total Candidates
+        </p>
+
+        <h2>
+            {{ total_candidates }}
+        </h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <p>
+            Interested
+        </p>
+
+        <h2>
+            {{ interested_count }}
+        </h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <p>
+            Yet to Confirm
+        </p>
+
+        <h2>
+            {{ waiting_count }}
+        </h2>
+
+    </div>
+
+
+    <div class="card">
+
+        <p>
+            Non-Interested
+        </p>
+
+        <h2>
+            {{ not_interested_count }}
+        </h2>
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     COUNSELLOR QUICK INFORMATION
+===================================================== -->
+
+<section class="panel" style="margin-top: 25px;">
+
 
     <div class="panel-title">
 
-        <h2>Candidate Overview</h2>
+        <h2>
+            Calling Task
+        </h2>
 
     </div>
+
+
+    {% if today_pending %}
 
     <div class="empty">
 
-        Use Student Management to add and maintain candidate enquiry records.
+        You have
+
+        <strong>
+            {{ today_pending }}
+        </strong>
+
+        pending calling task(s) for today.
+
+        <br><br>
+
+        <a href="{% url 'calling:task_list' %}" class="primary">
+
+            View Calling Tasks
+
+        </a>
 
     </div>
+
+
+    {% else %}
+
+    <div class="empty">
+
+        No pending calling tasks for today.
+
+    </div>
+
+    {% endif %}
+
 
 </section>
 
 
+
+{% else %}
+
+
+<div class="admin-dashboard">
+    <section>
+        <div class="admin-section-title"><h2>Card Section</h2></div>
+        <div class="admin-kpis weekly-kpis">
+            <article class="admin-kpi kpi-sky"><span>Calls assigned</span><strong>{{ weekly_totals.assigned }}</strong></article>
+            <article class="admin-kpi kpi-green"><span>Calls completed</span><strong>{{ weekly_totals.completed }}</strong></article>
+            <article class="admin-kpi kpi-amber"><span>Calls pending</span><strong>{{ weekly_totals.pending }}</strong></article>
+        </div>
+    </section>
+
+    <section class="admin-panel counsellor-week-panel">
+        <div class="admin-panel-heading">
+            <div><h3>Counsellor Table</h3></div>
+        </div>
+        <div class="admin-table-wrap">
+            <table class="admin-table counsellor-week-table">
+                <thead><tr><th>Counsellor</th><th>Enquiries</th><th>Calls assigned</th><th>Calls completed</th><th>Calls pending</th></tr></thead>
+                <tbody>
+                    {% for person in counsellor_summary %}
+                    <tr><td><strong>{{ person.name }}</strong></td><td>{{ person.enquiries }}</td><td>{{ person.assigned }}</td><td>{{ person.completed }}</td><td><span class="count-pill {% if person.pending %}count-warn{% endif %}">{{ person.pending }}</span></td></tr>
+                    {% empty %}<tr><td colspan="5" class="admin-empty">No active counsellors found.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="admin-panel weekly-day-panel">
+        <div class="admin-panel-heading"><div><h3>Weekly Report</h3></div></div>
+        <div class="chart-legend"><span><i class="legend-enquiry"></i>Enquiries</span><span><i class="legend-assigned"></i>Calls assigned</span><span><i class="legend-completed"></i>Calls completed</span></div>
+        <div class="activity-chart weekly-activity-chart" role="img" aria-label="Daily enquiry and calling totals for the last seven days">
+            {% for day in weekly_activity %}
+            <div class="activity-day" title="{{ day.date_label }}: {{ day.candidates }} enquiries, {{ day.assigned }} assigned, {{ day.completed }} completed">
+                <div class="activity-bars">
+                    <span class="bar-enquiry" style="height:{{ day.candidates_height }}%"></span>
+                    <span class="bar-assigned" style="height:{{ day.assigned_height }}%"></span>
+                    <span class="bar-completed" style="height:{{ day.completed_height }}%"></span>
+                </div>
+                <span class="activity-label">{{ day.label }} · {{ day.date_label }}</span>
+                <span class="activity-count">{{ day.candidates }} enq · {{ day.assigned }} assigned · {{ day.completed }} done</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endif %}
+
+
 {% endblock %}
+

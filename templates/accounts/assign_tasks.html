@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Assign Tasks | JET SKILLS{% endblock %}
+
+{% block content %}
+<header>
+    <div><h1>Assign Task</h1></div>
+</header>
+
+<section class="assign-task-stats">
+    <article><span>Total call records</span><strong>{{ total_calls }}</strong></article>
+    <article><span>Pending calls</span><strong>{{ pending_calls }}</strong></article>
+    <article><span>Completed calls</span><strong>{{ completed_calls }}</strong></article>
+    <article><span>Revoked calls</span><strong>{{ revoked_calls }}</strong></article>
+    <article><span>Unassigned / archived</span><strong>{{ archived_calls }}</strong></article>
+</section>
+
+<section class="panel assign-task-panel">
+    <div class="assign-task-tabs" role="tablist" aria-label="Task type">
+        <a href="{% url 'assign_tasks' %}?tab=counsellor" class="{% if tab == 'counsellor' %}active{% endif %}">Counsellor</a>
+        <a href="{% url 'assign_tasks' %}?tab=trainer" class="{% if tab == 'trainer' %}active{% endif %}">Trainer</a>
+    </div>
+
+    {% if tab == 'trainer' %}
+    <div class="task-placeholder">
+        <span class="placeholder-icon">◷</span>
+        <h2>Trainer task assignment is under development</h2>
+        <p>Trainer accounts are listed below. Trainer task types and assignment rules will be added in a future update.</p>
+        <div class="trainer-list">
+            {% for trainer in trainers %}
+            <div><span>{{ trainer.get_full_name|default:trainer.username }}</span><small>{{ trainer.profile.contact_no|default:'No contact number' }}</small></div>
+            {% empty %}<div class="admin-empty">No active trainers are set up yet.</div>{% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="assign-task-layout">
+        <aside class="counsellor-picker">
+            <h2>Counsellors</h2>
+            {% for counsellor in counsellors %}
+            <a href="{% url 'assign_tasks' %}?tab=counsellor&counsellor={{ counsellor.id }}" class="counsellor-choice {% if selected_counsellor.id == counsellor.id %}selected{% endif %}">
+                <span class="counsellor-avatar">{{ counsellor.first_name|default:counsellor.username|slice:':1'|upper }}</span>
+                <span class="counsellor-choice-name">{{ counsellor.get_full_name|default:counsellor.username }}<small>{{ counsellor.profile.contact_no|default:'Counsellor' }}</small></span>
+                <span class="choice-arrow">›</span>
+            </a>
+            {% empty %}<p class="admin-empty">No active counsellors found.</p>{% endfor %}
+
+            <a href="{% url 'assign_tasks' %}?tab=counsellor&counsellor=unassigned" class="counsellor-choice archived-choice {% if selected_key == 'unassigned' %}selected{% endif %}">
+                <span class="counsellor-avatar archived-avatar">↻</span>
+                <span class="counsellor-choice-name">Unassigned / Archived<small>{{ archived_calls }} retained call records</small></span>
+                <span class="choice-arrow">›</span>
+            </a>
+        </aside>
+
+        <div class="counsellor-task-content">
+            {% if selected_counsellor %}
+            <div class="selected-counsellor-heading">
+                <div><h2>{{ selected_counsellor.get_full_name|default:selected_counsellor.username }}</h2><span>{{ selected_counsellor.profile.contact_no|default:'Counsellor' }}</span></div>
+                <span class="role-chip">Counsellor</span>
+            </div>
+            {% elif selected_key == 'unassigned' %}
+            <div class="selected-counsellor-heading"><div><h2>Unassigned / Archived Calls</h2><span>Records retained after a counsellor account was deleted</span></div><span class="role-chip archived-chip">Archived</span></div>
+            {% else %}
+            <div class="task-empty-state"><h2>Select a counsellor</h2><p>Choose a counsellor from the list to assign, edit, transfer, or revoke their calls.</p></div>
+            {% endif %}
+
+            {% if selected_counsellor %}
+            <div class="assign-upload-box">
+                <h3>Assign calls from Excel</h3>
+                <p>Choose a .xlsx file, review its rows, then assign unique numbers to this counsellor.</p>
+                <form method="POST" enctype="multipart/form-data" id="assignCallsForm" action="{% url 'assign_calls' selected_counsellor.id %}">
+                    {% csrf_token %}
+                    <div class="assign-upload-row"><input type="file" name="excel_file" id="callingExcelFile" accept=".xlsx" required><button type="button" class="secondary" id="previewCallingFileBtn" onclick="previewCallingFile()">Check Excel Rows</button></div>
+                    <small class="upload-format-note">Expected columns: S.No | Reg. No | Ref | Name | Mobile. Name and a valid 10-digit mobile are required. Phone numbers already assigned anywhere in the calling team are skipped.</small>
+                    <a class="sample-excel-link" href="{% static 'sample_calling_tasks.xlsx' %}" download>Download 20-row sample Excel file</a>
+                    <div id="callingFilePreview" class="calling-preview-box" style="display:none"><strong id="callingPreviewSummary"></strong><div id="callingPreviewBreakdown"></div><div id="callingPreviewExamples"></div></div>
+                    <div class="assign-upload-actions"><button type="submit" class="primary" id="assignCallsSubmit" disabled>Upload &amp; Assign</button></div>
+                </form>
+            </div>
+            {% endif %}
+
+            {% if selected_counsellor or selected_key == 'unassigned' %}
+            <div class="task-table-heading"><h3>Calling Tasks</h3><span>{{ tasks|length }} record(s)</span></div>
+            <div class="admin-table-wrap">
+                <table class="admin-table assignment-table">
+                    <thead><tr><th>Candidate / Number</th><th>Registration</th><th>Assigned</th><th>Status</th><th>Task actions</th></tr></thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr>
+                            <td><strong>{{ task.candidate_name }}</strong><small class="table-subtext">{{ task.mobile }} · Ref {{ task.reference|default:'—' }}</small></td>
+                            <td>{{ task.reg_no|default:'—' }}</td>
+                            <td>{{ task.assigned_date|date:'d M Y' }}</td>
+                            <td><span class="status-badge {% if task.status == 'Pending' %}badge-amber{% elif task.status == 'Completed' %}badge-green{% else %}badge-red{% endif %}">{{ task.status }}</span></td>
+                            <td>
+                                <div class="task-row-actions">
+                                    {% if task.status == 'Pending' %}
+                                    <a class="task-action-link" href="{% url 'edit_call_task' task.id %}">Modify</a>
+                                    <form method="POST" action="{% url 'transfer_call_task' task.id %}" class="task-transfer-form">
+                                        {% csrf_token %}<select name="counsellor_id" aria-label="Transfer call to" required><option value="">Transfer to…</option>{% for target in transfer_targets %}{% if target.id != task.counsellor_id %}<option value="{{ target.id }}">{{ target.get_full_name|default:target.username }}</option>{% endif %}{% endfor %}</select><button type="submit" class="task-action-link">Transfer</button>
+                                    </form>
+                                    <form method="POST" action="{% url 'revoke_call_task' task.id %}" class="inline-form">{% csrf_token %}<button type="submit" class="task-action-link task-revoke" onclick="return confirm('Revoke this call? The task record will remain in history.')">Revoke</button></form>
+                                    {% else %}<span class="muted-action">No actions</span>{% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}<tr><td colspan="5" class="admin-empty">No calling tasks in this list yet.</td></tr>{% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function resetCallingPreview() {
+    const preview = document.getElementById('callingFilePreview');
+    if (!preview) return;
+    preview.style.display = 'none';
+    document.getElementById('callingPreviewSummary').textContent = '';
+    document.getElementById('callingPreviewBreakdown').textContent = '';
+    document.getElementById('callingPreviewExamples').replaceChildren();
+    document.getElementById('assignCallsSubmit').disabled = true;
+}
+async function previewCallingFile() {
+    const file = document.getElementById('callingExcelFile').files[0];
+    const preview = document.getElementById('callingFilePreview');
+    const previewButton = document.getElementById('previewCallingFileBtn');
+    resetCallingPreview();
+    if (!file) {
+        preview.style.display = 'block';
+        document.getElementById('callingPreviewSummary').textContent = 'Choose an Excel file first.';
+        return;
+    }
+    preview.style.display = 'block';
+    document.getElementById('callingPreviewSummary').textContent = 'Reading file…';
+    previewButton.disabled = true;
+    const form = document.getElementById('assignCallsForm');
+    const previewUrl = form.action.replace('/assign-calls/', '/preview-calls/');
+    try {
+        const response = await fetch(previewUrl, {method:'POST', body:new FormData(form)});
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Unable to read this file.');
+        const c = result.counts;
+        document.getElementById('callingPreviewSummary').textContent = `${c.rows} rows found — ${c.valid} calls ready to assign`;
+        document.getElementById('callingPreviewBreakdown').textContent = `Invalid: ${c.invalid} · Duplicates: ${c.duplicates} · Blank: ${c.blank}`;
+        const list = document.getElementById('callingPreviewExamples');
+        if (result.examples.length) {
+            const heading = document.createElement('p'); heading.textContent = 'Sample rows ready to assign'; list.appendChild(heading);
+            result.examples.forEach(item => { const row=document.createElement('div'); row.textContent=`${item.name} — ${item.mobile}`; list.appendChild(row); });
+        }
+        document.getElementById('assignCallsSubmit').disabled = c.valid < 1;
+    } catch (error) {
+        document.getElementById('callingPreviewSummary').textContent = error.message;
+    } finally { previewButton.disabled = false; }
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('callingExcelFile');
+    if (input) input.addEventListener('change', resetCallingPreview);
+});
+</script>
+{% endblock %}

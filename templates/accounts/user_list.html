@@ -1,0 +1,1028 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}
+
+User Management | JET SKILLS
+
+{% endblock %}
+
+
+
+{% block content %}
+
+
+<header>
+
+    <div>
+
+        <h1>
+            User Management
+        </h1>
+
+    </div>
+
+
+    <button type="button" class="primary" onclick="openUserModal()">
+
+        Add User
+
+    </button>
+
+</header>
+
+
+
+<!-- =====================================================
+     USER LIST
+===================================================== -->
+
+<section class="panel">
+
+
+    <div class="table-wrap">
+
+
+        <table>
+
+
+            <thead>
+
+                <tr>
+
+                    <th>S.No</th>
+
+                    <th>Name</th>
+
+                    <th>Username</th>
+
+                    <th>Contact No.</th>
+
+                    <th>Role</th>
+
+                    <th>Status</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+                {% for account in users %}
+
+
+                <tr>
+
+
+                    <td>
+
+                        {{ forloop.counter }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ account.get_full_name|default:account.username }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ account.username }}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if account.is_superuser %}
+
+                        -
+
+                        {% else %}
+
+                        {{ account.profile.contact_no|default:"-" }}
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if account.is_superuser %}
+
+                        Super Admin
+
+                        {% else %}
+
+                        {{ account.profile.role }}
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if account.is_active %}
+
+                        Active
+
+                        {% else %}
+
+                        Inactive
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+
+                        {% if not account.is_superuser %}
+
+
+                        <div class="user-actions">
+
+
+                            <!-- EDIT -->
+
+                            <button type="button" class="action-btn" onclick="openEditUserModal(
+                                    '{{ account.id }}',
+                                    '{{ account.get_full_name|escapejs }}',
+                                    '{{ account.username|escapejs }}',
+                                    '{{ account.email|escapejs }}',
+                                    '{{ account.profile.contact_no|escapejs }}',
+                                    '{{ account.profile.role|escapejs }}'
+                                )">
+
+                                Edit
+
+                            </button>
+
+
+
+                            <!-- RESET PASSWORD -->
+
+                            <button type="button" class="action-btn" onclick="openResetPasswordModal(
+                                    '{{ account.id }}',
+                                    '{{ account.username|escapejs }}'
+                                )">
+
+                                Reset Password
+
+                            </button>
+
+
+
+                            <!-- ACTIVATE / DEACTIVATE -->
+
+                            <form method="POST" action="{% url 'toggle_user_status' account.id %}" class="inline-form">
+
+                                {% csrf_token %}
+
+
+                                {% if account.is_active %}
+
+                                <button type="submit" class="action-btn deactivate" onclick="return confirm(
+                                        'Are you sure you want to deactivate this user?'
+                                    )">
+
+                                    Deactivate
+
+                                </button>
+
+
+                                {% else %}
+
+                                <button type="submit" class="action-btn activate" onclick="return confirm(
+                                        'Are you sure you want to activate this user?'
+                                    )">
+
+                                    Activate
+
+                                </button>
+
+                                {% endif %}
+
+
+                            </form>
+
+                            {% if account.id != request.user.id %}
+                            <form method="POST" action="{% url 'delete_user' account.id %}" class="inline-form">
+                                {% csrf_token %}
+                                <button type="submit" class="action-btn delete" onclick="return confirm('Delete {{ account.get_full_name|default:account.username|escapejs }}? Candidate records and calling tasks will be retained. Their calls will move to Unassigned / Archived.')">
+                                    Delete
+                                </button>
+                            </form>
+                            {% endif %}
+
+
+                        </div>
+
+
+                        {% else %}
+
+                        -
+
+                        {% endif %}
+
+
+                    </td>
+
+
+                </tr>
+
+
+                {% empty %}
+
+
+                <tr>
+
+                    <td colspan="7" class="empty">
+
+                        No users found.
+
+                    </td>
+
+                </tr>
+
+
+                {% endfor %}
+
+
+            </tbody>
+
+
+        </table>
+
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     ADD USER MODAL
+===================================================== -->
+
+<div id="userModal" class="modal">
+
+
+    <div class="modal-box">
+
+
+        <div class="modal-head">
+
+
+            <h2>
+                Add User
+            </h2>
+
+
+            <button type="button" class="close" onclick="closeUserModal()">
+
+                &times;
+
+            </button>
+
+
+        </div>
+
+
+
+        <form method="POST" action="{% url 'add_user' %}">
+
+
+            {% csrf_token %}
+
+
+            <div class="form-grid">
+
+
+                <div class="field">
+
+                    <label>
+
+                        Full Name
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    {{ form.full_name }}
+
+
+                    {% for error in form.full_name.errors %}
+
+                    <small class="form-error">
+
+                        {{ error }}
+
+                    </small>
+
+                    {% endfor %}
+
+                </div>
+
+
+
+                <div class="field">
+
+                    <label>
+
+                        Username
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    {{ form.username }}
+
+
+                    {% for error in form.username.errors %}
+
+                    <small class="form-error">
+
+                        {{ error }}
+
+                    </small>
+
+                    {% endfor %}
+
+                </div>
+
+
+
+                <div class="field">
+
+                    <label>
+                        Email
+                    </label>
+
+                    {{ form.email }}
+
+                </div>
+
+
+
+                <div class="field">
+
+                    <label>
+                        Contact No.
+                    </label>
+
+                    {{ form.contact_no }}
+
+                </div>
+
+
+
+                <div class="field">
+
+                    <label>
+
+                        Role
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+                    {{ form.role }}
+
+                </div>
+
+
+
+                <div class="field">
+
+                    <label>
+
+                        Password
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+                    {{ form.password }}
+
+                </div>
+
+
+
+                <div class="field">
+
+                    <label>
+
+                        Confirm Password
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    {{ form.confirm_password }}
+
+
+                    {% for error in form.confirm_password.errors %}
+
+                    <small class="form-error">
+
+                        {{ error }}
+
+                    </small>
+
+                    {% endfor %}
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="form-actions">
+
+
+                <button type="button" class="secondary" onclick="closeUserModal()">
+
+                    Cancel
+
+                </button>
+
+
+                <button type="submit" class="primary">
+
+                    Save User
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     EDIT USER MODAL
+===================================================== -->
+
+<div id="editUserModal" class="modal">
+
+
+    <div class="modal-box">
+
+
+        <div class="modal-head">
+
+
+            <h2>
+                Edit User
+            </h2>
+
+
+            <button type="button" class="close" onclick="closeEditUserModal()">
+
+                &times;
+
+            </button>
+
+
+        </div>
+
+
+
+        <form method="POST" id="editUserForm">
+
+
+            {% csrf_token %}
+
+
+            <div class="form-grid">
+
+
+                <div class="field">
+
+                    <label>
+
+                        Full Name
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <input type="text" name="full_name" id="editFullName" required>
+
+                </div>
+
+
+
+                <div class="field">
+
+                    <label>
+
+                        Username
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <input type="text" name="username" id="editUsername" required>
+
+                </div>
+
+
+
+                <div class="field">
+
+                    <label>
+                        Email
+                    </label>
+
+
+                    <input type="email" name="email" id="editEmail">
+
+                </div>
+
+
+
+                <div class="field">
+
+                    <label>
+                        Contact No.
+                    </label>
+
+
+                    <input type="text" name="contact_no" id="editContact" maxlength="15">
+
+                </div>
+
+
+
+                <div class="field">
+
+                    <label>
+
+                        Role
+
+                        <span class="required">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <select name="role" id="editRole" required>
+
+
+                        <option value="Admin">
+                            Admin
+                        </option>
+
+                        <option value="Counsellor">
+                            Counsellor
+                        </option>
+
+                        <option value="Trainer">
+                            Trainer
+                        </option>
+
+
+                    </select>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="form-actions">
+
+
+                <button type="button" class="secondary" onclick="closeEditUserModal()">
+
+                    Cancel
+
+                </button>
+
+
+                <button type="submit" class="primary">
+
+                    Update User
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     RESET PASSWORD MODAL
+===================================================== -->
+
+<div id="resetPasswordModal" class="modal">
+
+
+    <div class="modal-box" style="max-width: 500px;">
+
+
+        <div class="modal-head">
+
+
+            <div>
+
+                <h2>
+                    Reset Password
+                </h2>
+
+                <p id="resetPasswordUsername" style="
+                        margin: 5px 0 0;
+                        color: #64748b;
+                    ">
+                </p>
+
+            </div>
+
+
+            <button type="button" class="close" onclick="closeResetPasswordModal()">
+
+                &times;
+
+            </button>
+
+
+        </div>
+
+
+
+        <form method="POST" id="resetPasswordForm">
+
+
+            {% csrf_token %}
+
+
+        <div class="field">
+
+                <label>
+
+                    New Password
+
+                    <span class="required">
+                        *
+                    </span>
+
+                </label>
+
+
+                <input type="password" name="password" placeholder="Enter new password" required>
+
+            </div>
+
+
+
+            <div class="field" style="margin-top: 15px;">
+
+
+                <label>
+
+                    Confirm Password
+
+                    <span class="required">
+                        *
+                    </span>
+
+                </label>
+
+
+                <input type="password" name="confirm_password" placeholder="Confirm new password" required>
+
+            </div>
+
+
+
+            <div class="form-actions">
+
+
+                <button type="button" class="secondary" onclick="closeResetPasswordModal()">
+
+                    Cancel
+
+                </button>
+
+
+                <button type="submit" class="primary">
+
+                    Reset Password
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+
+</div>
+
+
+
+{% endblock %}
+
+
+
+{% block scripts %}
+
+
+<script>
+
+
+    /* =====================================================
+       ADD USER
+    ===================================================== */
+
+    function openUserModal() {
+
+        document
+            .getElementById(
+                'userModal'
+            )
+            .classList.add(
+                'show'
+            );
+
+    }
+
+
+    function closeUserModal() {
+
+        document
+            .getElementById(
+                'userModal'
+            )
+            .classList.remove(
+                'show'
+            );
+
+    }
+
+
+
+    /* =====================================================
+       OPEN ADD MODAL AFTER FORM ERROR
+    ===================================================== */
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        function () {
+
+            const openModal =
+                "{{ open_add_modal|default:''|escapejs }}";
+
+
+            if (
+                openModal === "True"
+            ) {
+
+                openUserModal();
+
+            }
+
+        }
+    );
+
+
+
+    /* =====================================================
+       EDIT USER
+    ===================================================== */
+
+    function openEditUserModal(
+        id,
+        fullName,
+        username,
+        email,
+        contact,
+        role
+    ) {
+
+        document.getElementById(
+            'editFullName'
+        ).value =
+            fullName;
+
+
+        document.getElementById(
+            'editUsername'
+        ).value =
+            username;
+
+
+        document.getElementById(
+            'editEmail'
+        ).value =
+            email;
+
+
+        document.getElementById(
+            'editContact'
+        ).value =
+            contact;
+
+
+        document.getElementById(
+            'editRole'
+        ).value =
+            role;
+
+
+        document.getElementById(
+            'editUserForm'
+        ).action =
+            '/accounts/edit/' +
+            id +
+            '/';
+
+
+        document.getElementById(
+            'editUserModal'
+        ).classList.add(
+            'show'
+        );
+
+    }
+
+
+    function closeEditUserModal() {
+
+        document.getElementById(
+            'editUserModal'
+        ).classList.remove(
+            'show'
+        );
+
+    }
+
+
+
+    /* =====================================================
+       RESET PASSWORD
+    ===================================================== */
+
+    function openResetPasswordModal(
+        id,
+        username
+    ) {
+
+        document.getElementById(
+            'resetPasswordUsername'
+        ).textContent =
+            'User: ' +
+            username;
+
+
+        document.getElementById(
+            'resetPasswordForm'
+        ).action =
+            '/accounts/reset-password/' +
+            id +
+            '/';
+
+
+        document.getElementById(
+            'resetPasswordModal'
+        ).classList.add(
+            'show'
+        );
+
+    }
+
+
+    function closeResetPasswordModal() {
+
+        document.getElementById(
+            'resetPasswordModal'
+        ).classList.remove(
+            'show'
+        );
+
+    }
+
+
+
+    /* =====================================================
+       CLOSE MODALS WHEN CLICKING OUTSIDE
+    ===================================================== */
+
+    window.addEventListener(
+        'click',
+        function (event) {
+
+
+            const addModal =
+                document.getElementById(
+                    'userModal'
+                );
+
+
+            const editModal =
+                document.getElementById(
+                    'editUserModal'
+                );
+
+
+            const resetModal =
+                document.getElementById(
+                    'resetPasswordModal'
+                );
+
+
+            if (
+                event.target === addModal
+            ) {
+
+                closeUserModal();
+
+            }
+
+
+            if (
+                event.target === editModal
+            ) {
+
+                closeEditUserModal();
+
+            }
+
+
+            if (
+                event.target === resetModal
+            ) {
+
+                closeResetPasswordModal();
+
+            }
+
+
+        }
+    );
+
+
+</script>
+
+
+{% endblock %}
+
+
